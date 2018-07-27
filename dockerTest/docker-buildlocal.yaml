@@ -1,10 +1,10 @@
 version: "3"
 services:
   webserver:
-    image: "mysterygoat/dev_front:v0"
+    build: ./webserver
     ports:
       - "6666:80"
   redis:
     image: "redis:alpine"
   worker:
-    image: "mysterygoat/dev_front:v0"
+    build: ./worker
