@@ -6,4 +6,4 @@ spec:
   ports:
   - port: 6379
   selector:
-    app: hive-redis
+    sort: redis

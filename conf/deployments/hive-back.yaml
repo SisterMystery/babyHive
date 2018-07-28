@@ -8,9 +8,11 @@ spec:
     metadata:
       labels:
         app: hive
+        sort: worker
     spec:
       containers:
       - name: hive-back
+        imagePullPolicy: Always
         image: mysterygoat/dev_back:v0
         env:
         - name: REDIS

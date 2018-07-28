@@ -8,9 +8,11 @@ spec:
     metadata:
       labels:
         app: hive
+        sort: redis
     spec:
       containers:
       - name: redis 
+        imagePullPolicy: Always
         image: redis:alpine
         ports:
         - containerPort: 6379

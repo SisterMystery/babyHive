@@ -4,9 +4,11 @@ metadata:
   name: hive-front
 spec:
   type: NodePort
+  selector:
+    sort: front
   ports:
-  - port: 8080
-    targetport: 80
-    protocol: tcp
+  - port: 80
+    targetPort: 80
+    protocol: TCP
     name: http
 

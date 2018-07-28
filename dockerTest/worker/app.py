@@ -21,7 +21,7 @@ batch_size = int(sys.argv[3])
 epochs = int(sys.argv[4])
 paths = sys.argv[5:]
 
-redis_host = os.environ['REDIS']#"redis"
+redis_host = os.environ['REDIS']
 redis_port = 6379
 redis_password = ""
 

@@ -8,10 +8,15 @@ spec:
     metadata:
       labels:
         app: hive
+        sort: front
     spec:
       containers:
       - name: hive-front
+        imagePullPolicy: Always
         image: mysterygoat/dev_front:v0
+        ports:
+        - containerPort: 80
+          name: hive-front
         env:
         - name: REDIS
           value: "hive-redis"
