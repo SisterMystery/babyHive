@@ -1,0 +1,18 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: hive-back
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: hive
+    spec:
+      containers:
+      - name: hive-back
+        image: mysterygoat/dev_back:v0
+        env:
+        - name: REDIS
+          value: "hive-redis"
+
