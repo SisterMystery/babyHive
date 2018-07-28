@@ -11,7 +11,7 @@ import time
 
 app = Flask(__name__)
 
-redis_host = "redis"
+redis_host = os.environ['REDIS']#"redis"
 redis_port = 6379
 redis_password = ""
 

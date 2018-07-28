@@ -21,7 +21,7 @@ batch_size = int(sys.argv[3])
 epochs = int(sys.argv[4])
 paths = sys.argv[5:]
 
-redis_host = "redis"
+redis_host = os.environ['REDIS']#"redis"
 redis_port = 6379
 redis_password = ""
 
@@ -104,6 +104,10 @@ def do_work(in_text):
 	global batch_size
 	global epochs
 	global text
+	global chars
+	global char_indices
+	global indices_char
+	global model
 
 	text = in_text
 
@@ -149,11 +153,13 @@ def do_work(in_text):
 
 def get_work(storage=r):
 	if "in_data" in r.keys():
-		return read_log("in_data", storage=storage)
+		d = read_log("in_data", storage=storage)
+		storage.delete("in_data")
+		return d
 	return None
 
 while True:
-	time.sleep(2)
+	time.sleep(.5)
 	to_process = get_work()
 	if to_process:
 		do_work(to_process)
