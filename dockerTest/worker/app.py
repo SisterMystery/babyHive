@@ -19,7 +19,7 @@ maxlen = int(sys.argv[1])
 step = int(sys.argv[2])
 batch_size = int(sys.argv[3])
 epochs = int(sys.argv[4])
-paths = sys.argv[5:]
+learn_rate = float(sys.argv[5])
 
 redis_host = os.environ['REDIS']
 redis_port = 6379
@@ -97,72 +97,61 @@ def on_epoch_end(epoch, logs):
         write_log(generated.replace("\n", "<br/>"))
 
 
-
-def do_work(in_text):
-	global maxlen
-	global step	
-	global batch_size
-	global epochs
-	global text
-	global chars
-	global char_indices
-	global indices_char
-	global model
-
-	text = in_text
-
-	r.set('out_data', "<p> Beep, Boop; Hello world. While I may look like A girl, I am a robot: a pretty robot </p>")
-	write_log('corpus length: ' + str(len(text)))
-	chars = sorted(list(set(text)))
-	write_log('total chars:' + str(len(chars)))
-	char_indices = dict((c, i) for i, c in enumerate(chars))
-	indices_char = dict((i, c) for i, c in enumerate(chars))
-
-	sentences = []
-	next_chars = []
-	for i in range(0, len(text) - maxlen, step):
-	    sentences.append(text[i: i + maxlen])
-	    next_chars.append(text[i + maxlen])
-	write_log('nb sequences:' + str(len(sentences)))
-
-	write_log('Vectorization...')
-	x = np.zeros((len(sentences), maxlen, len(chars)), dtype=np.bool)
-	y = np.zeros((len(sentences), len(chars)), dtype=np.bool)
-	for i, sentence in enumerate(sentences):
-	    for t, char in enumerate(sentence):
-	        x[i, t, char_indices[char]] = 1
-	    y[i, char_indices[next_chars[i]]] = 1
-
-
-	# build the model: a single LSTM
-	write_log('Build model...')
-	model = Sequential()
-	model.add(LSTM(128, input_shape=(maxlen, len(chars))))
-	model.add(Dense(len(chars)))
-	model.add(Activation('softmax'))
-
-	optimizer = RMSprop(lr=0.01)
-	model.compile(loss='categorical_crossentropy', optimizer=optimizer)
-
-	print_callback = LambdaCallback(on_epoch_end=on_epoch_end)
-
-	model.fit(x, y,
-	          batch_size=batch_size,
-	          epochs=epochs,
-	          callbacks=[print_callback])
-
 def get_work(storage=r):
 	if "in_data" in r.keys():
 		d = read_log("in_data", storage=storage)
+		print(str(len(d)))
+		write_log(d)
 		storage.delete("in_data")
 		return d
 	return None
 
-while True:
-	time.sleep(.5)
+to_process = None
+while not to_process:
+	time.sleep(.2)
+	print('data fetch')
 	to_process = get_work()
-	if to_process:
-		do_work(to_process)
-		sys.exit()
 
+
+text = to_process
+write_log(text)
+r.set('out_data', "<p> Beep, Boop; Hello world. While I may look like A girl, I am a robot: a pretty robot </p>")
+write_log('corpus length: ' + str(len(text)))
+chars = sorted(list(set(text)))
+write_log('total chars:' + str(len(chars)))
+char_indices = dict((c, i) for i, c in enumerate(chars))
+indices_char = dict((i, c) for i, c in enumerate(chars))
+
+sentences = []
+next_chars = []
+for i in range(0, len(text) - maxlen, step):
+    sentences.append(text[i: i + maxlen])
+    next_chars.append(text[i + maxlen])
+write_log('nb sequences:' + str(len(sentences)))
+
+write_log('Vectorization...')
+x = np.zeros((len(sentences), maxlen, len(chars)), dtype=np.bool)
+y = np.zeros((len(sentences), len(chars)), dtype=np.bool)
+for i, sentence in enumerate(sentences):
+    for t, char in enumerate(sentence):
+        x[i, t, char_indices[char]] = 1
+    y[i, char_indices[next_chars[i]]] = 1
+
+
+# build the model: a single LSTM
+write_log('Build model...')
+model = Sequential()
+model.add(LSTM(128, input_shape=(maxlen, len(chars))))
+model.add(Dense(len(chars)))
+model.add(Activation('softmax'))
+
+optimizer = RMSprop(lr=learn_rate)
+model.compile(loss='categorical_crossentropy', optimizer=optimizer)
+
+print_callback = LambdaCallback(on_epoch_end=on_epoch_end)
+
+model.fit(x, y,
+          batch_size=batch_size,
+          epochs=epochs,
+          callbacks=[print_callback])
 

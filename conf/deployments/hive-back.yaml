@@ -13,7 +13,11 @@ spec:
       containers:
       - name: hive-back
         imagePullPolicy: Always
+        stdin: true
+        tty: true
         image: mysterygoat/dev_back:v0
+        command: ["python"]
+        args: ["app.py", "100", "1", "128", "60", "0.01"]
         env:
         - name: REDIS
           value: "hive-redis"

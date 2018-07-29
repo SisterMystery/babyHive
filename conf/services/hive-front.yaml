@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: hive-front
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     sort: front
   ports:
