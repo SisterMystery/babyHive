@@ -95,13 +95,12 @@ def on_epoch_end(epoch, logs):
             generated += next_char
             sentence = sentence[1:] + next_char
         write_log(generated.replace("\n", "<br/>"))
-
+    #write_log(text)
 
 def get_work(storage=r):
 	if "in_data" in r.keys():
 		d = read_log("in_data", storage=storage)
 		print(str(len(d)))
-		write_log(d)
 		storage.delete("in_data")
 		return d
 	return None
@@ -114,7 +113,6 @@ while not to_process:
 
 
 text = to_process
-write_log(text)
 r.set('out_data', "<p> Beep, Boop; Hello world. While I may look like A girl, I am a robot: a pretty robot </p>")
 write_log('corpus length: ' + str(len(text)))
 chars = sorted(list(set(text)))
