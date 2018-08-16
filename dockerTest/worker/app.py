@@ -4,7 +4,7 @@ from keras.callbacks import LambdaCallback
 from keras.models import Sequential
 from keras.layers import Dense, Activation
 from keras.layers import LSTM
-from keras.optimizers import RMSprop
+from keras.optimizers import RMSprop, Adadelta
 from keras.utils.data_utils import get_file
 import redis
 import numpy as np
@@ -20,6 +20,8 @@ step = int(sys.argv[2])
 batch_size = int(sys.argv[3])
 epochs = int(sys.argv[4])
 learn_rate = float(sys.argv[5])
+loss_func = sys.argv[6]
+opt_func = sys.argv[7]
 
 redis_host = os.environ['REDIS']
 redis_port = 6379
@@ -27,7 +29,15 @@ redis_password = ""
 
 text = ""
 
-r = redis.StrictRedis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True)
+rt = 10
+r = None
+while rt > 0 and not r:
+    time.sleep(.5)
+    try: 
+        r = redis.StrictRedis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True)
+    except:
+        rt -= 1
+
 def read_log(key='in_data', retries=8, storage=r):
 	while retries > 0:
 		try:
@@ -74,9 +84,8 @@ def on_epoch_end(epoch, logs):
  #           start_index = random.randint(0, len(text) - maxlen - 1)
  #   start_index += 1
 
-    for diversity in [0.1 , 0.5, 0.7, 1.0, 1.3]:
+    for diversity in np.arange(0.1,1.6,.1):
         write_log('----- diversity:' + str(diversity))
-        write_log("\n")
 
         generated = ''
         sentence = text[start_index: start_index + maxlen]
@@ -104,6 +113,7 @@ def get_work(storage=r):
 		storage.delete("in_data")
 		return d
 	return None
+
 
 to_process = None
 while not to_process:
@@ -143,8 +153,10 @@ model.add(LSTM(128, input_shape=(maxlen, len(chars))))
 model.add(Dense(len(chars)))
 model.add(Activation('softmax'))
 
-optimizer = RMSprop(lr=learn_rate)
-model.compile(loss='categorical_crossentropy', optimizer=optimizer)
+#optimizer = Adadelta(lr=learn_rate)
+if opt_func == 'RMSprop':
+    opt_func = RMSprop(lr=learn_rate)
+model.compile(loss=loss_func, optimizer=opt_func)
 
 print_callback = LambdaCallback(on_epoch_end=on_epoch_end)
 

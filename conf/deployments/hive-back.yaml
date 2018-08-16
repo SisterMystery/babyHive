@@ -12,10 +12,14 @@ spec:
     spec:
       containers:
       - name: hive-back
+        resources:
+          limits:
+            memory: "7Gi"
+            cpu: "1"
         imagePullPolicy: Always
         image: mysterygoat/dev_back:v0
         command: ["python"]
-        args: ["app.py", "100", "2", "64", "60", "0.015"]
+        args: ["app.py", "45", "2", "256", "60", "0.1", 'kullback_leibler_divergence' ,'Adadelta']
         env:
         - name: REDIS
           value: "hive-redis"
