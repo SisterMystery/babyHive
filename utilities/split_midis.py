@@ -14,7 +14,11 @@ def split_tracks(m_file):
                 not any([(isinstance(e, midi.NoteEvent) and e.channel == 9)  for e in m_file[i]])]
     return []
 
-
+def remove_drums(m_file):
+    if m_file:
+        return midi.Pattern([m_file[0]]+[remove_events(m_file[i]) for i in range(1,len(m_file)) if any([isinstance(e, midi.NoteEvent) for e in m_file[i]]) and
+                not any([(isinstance(e, midi.NoteEvent) and e.channel == 9)  for e in m_file[i]])], m_file.resolution, m_file.tick_relative)
+    return []
 
 def try_readmidi(m_file):
     try:
@@ -40,13 +44,12 @@ def note_off_equals(note, other_note):
 
 def is_stacked(note, stack_ranges):
     if not isinstance(note, midi.NoteEvent): return False
+    if note.velocity == 0: return False
     for r in stack_ranges:
         if note.tick == r[0].tick:
-            return r[0].velocity != 0 and not note_on_equals(r[0], note)
-        if note.tick > r[0].tick and note.tick < r[1].tick:
+            return  not note_on_equals(r[0], note)
+        if note.velocity != 0 and note.tick > r[0].tick and note.tick < r[1].tick:
             return True
-        if note.tick == r[1].tick and note != r[1]:
-            return note.velocity == 0
     return False
 
 def flatten_melody(track):
@@ -75,8 +78,10 @@ if __name__ == "__main__":
     midi_dir = sys.argv[1]
     out_dir = sys.argv[2]
 
-    midis = {p:split_tracks(try_readmidi(p)) for p in gather_midis(midi_dir)}
+    #midis = {p:split_tracks(try_readmidi(p)) for p in gather_midis(midi_dir)}
+    midis = {p:remove_drums(try_readmidi(p)) for p in gather_midis(midi_dir)}
     for name, pat_list in midis.items():
-        for idx, mid in enumerate(pat_list):
-            midi.write_midifile(os.path.join(out_dir, os.path.basename(name).replace(".mid",'')+"_t"+str(idx)+".mid"), mid)
-
+        if pat_list:
+            midi.write_midifile(os.path.join(out_dir, os.path.basename(name)+".mid"), pat_list)
+    #    for idx, mid in enumerate(pat_list):
+    #        midi.write_midifile(os.path.join(out_dir, os.path.basename(name).replace(".mid",'')+"_t"+str(idx)+".mid"), mid)
