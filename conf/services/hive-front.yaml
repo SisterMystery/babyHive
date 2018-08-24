@@ -8,7 +8,7 @@ spec:
     sort: front
   ports:
   - port: 80
-    targetPort: 80
+    targetPort: 6006
     protocol: TCP
     name: http
 

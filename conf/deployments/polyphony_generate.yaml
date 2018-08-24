@@ -29,4 +29,4 @@ spec:
         - mountPath: "/mnt/data"
           name: volume
         command: ["bash"]
-        args: ["-c", "if [ ! -f /mnt/data/$train_data ]; then mv $data_tar /mnt/data/; cd /mnt/data/; tar -xvf $data_tar; fi; for((;;)); do polyphony_rnn_train --run_dir=/mnt/data/rundir --sequence_example_file=/mnt/data/$train_data --hparams='learning_rate=0.0014,attn_length=15,batch_size=64,rnn_layer_sizes=[256,256,256]' --num_training_steps=5; done;"]
+        args: ["-c", "polyphony_rnn_generate --run_dir=/mnt/data/rundir --hparams='learning_rate=0.0014,attn_length=15,batch_size=64,rnn_layer_sizes=[256,256,256]' --output_dir=/mnt/data/out --num_outputs=2 --num_steps=512 ----primer_pitches='[67,63,60]' --condition_on_primer=true --inject_primer_during_generation=false;"]
