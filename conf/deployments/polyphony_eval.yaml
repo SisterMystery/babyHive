@@ -1,28 +1,39 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: hive-back
+  name: polyphony-eval
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: hive
-        sort: worker
+        app: music-rnn
+        sort: eval
     spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: sort
+                operator: In
+                values:
+                - learndisk
+                - learner
+            topologyKey: "kubernetes.io/hostname"
       volumes:
       - name: volume
         persistentVolumeClaim:
-          claimName: azure-managed-disk
+          claimName: hivefiles
       containers:
-      - name: hive-back
+      - name: eval
         resources:
           requests:
-            memory: "10Gi"
-            cpu: "4"
+            memory: "1Gi"
+            cpu: "1"
           limits:
-            memory: "27Gi"
-            cpu: "7.1"
+            memory: "2Gi"
+            cpu: "3"
         imagePullPolicy: Always
         image: mysterygoat/dev_back:v0
         volumeMounts:

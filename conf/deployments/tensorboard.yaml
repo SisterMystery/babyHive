@@ -1,21 +1,32 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: hive-front
+  name: polyphony-tensorboard
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: hive
-        sort: front
+        app: music-rnn
+        sort: tensorboard
     spec:
+     affinity:
+      podAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: sort
+              operator: In
+              values:
+              - learndisk
+              - learner
+          topologyKey: "kubernetes.io/hostname"
      volumes:
       - name: volume
         persistentVolumeClaim:
-          claimName: azure-managed-disk
+          claimName: hivefiles
      containers:
-      - name: hive-front
+      - name: tensorboard
         imagePullPolicy: Always
         image: tensorflow/tensorflow
         ports:

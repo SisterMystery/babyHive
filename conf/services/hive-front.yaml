@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: hive-front
+  name: tensorboard-front
 spec:
   type: LoadBalancer
   selector:
-    sort: front
+    sort: tensorboard
   ports:
   - port: 80
     targetPort: 6006

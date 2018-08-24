@@ -1,32 +1,32 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: hive-back
+  name: polyphony-learn
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: hive
-        sort: worker
+        app: music-rnn
+        sort: learner
     spec:
       volumes:
       - name: volume
         persistentVolumeClaim:
           claimName: azure-managed-disk
       containers:
-      - name: hive-back
+      - name: learner
         resources:
           requests:
-            memory: "27Gi"
-            cpu: "7.1"
+            memory: "25Gi"
+            cpu: "6.5"
           limits:
-            memory: "27Gi"
-            cpu: "7.1"
+            memory: "25Gi"
+            cpu: "6.5"
         imagePullPolicy: Always
         image: mysterygoat/dev_back:v0
         volumeMounts:
         - mountPath: "/mnt/data"
           name: volume
         command: ["bash"]
-        args: ["-c", "if [ ! -f /mnt/data/$train_data ]; then mv $data_tar /mnt/data/; cd /mnt/data/; tar -xvf $data_tar; fi; for((;;)); do polyphony_rnn_train --run_dir=/mnt/data/rundir --sequence_example_file=/mnt/data/$train_data --hparams='learning_rate=0.0014,attn_length=15,batch_size=64,rnn_layer_sizes=[256,256,256]' --num_training_steps=5; done;"]
+        args: ["-c", "if [ ! -f /mnt/data/$train_data ]; then mv $data_tar /mnt/data/; cd /mnt/data/; tar -xvf $data_tar; fi; for((;;)); do polyphony_rnn_train --run_dir=/mnt/data/rundir --sequence_example_file=/mnt/data/$train_data --hparams='learning_rate=0.0011,attn_length=15,batch_size=64,rnn_layer_sizes=[256,256,256]' --num_training_steps=5; done;"]
